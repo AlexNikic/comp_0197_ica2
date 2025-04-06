@@ -33,7 +33,6 @@ import torch.nn as nn
 import torchvision.transforms as T
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
-
 import selectivesearch
 import pydensecrf.densecrf as dcrf
 from pydensecrf.utils import unary_from_softmax
@@ -45,8 +44,8 @@ from sklearn.model_selection import KFold
 IMAGE_NORMALIZE_MEAN = [0.485, 0.456, 0.406]
 IMAGE_NORMALIZE_STD  = [0.229, 0.224, 0.225]
 
-N_FOLDS = 5
-N_SEARCH = 5  # Number of random hyperparameter trials
+N_FOLDS = 1
+N_SEARCH = 10  # Number of random hyperparameter trials
 OUT_MASK_DIR = "output_masks_boxsup"
 OUT_MODEL_DIR = "boxsup_checkpoint"
 os.makedirs(OUT_MASK_DIR, exist_ok=True)
@@ -142,7 +141,7 @@ def collate_fn(batch):
 ##############################
 # 4) ADVANCED BOX SUP FUNCTIONS
 ##############################
- def run_selective_search(pil_img):
+def run_selective_search(pil_img):
     """
     Run selective search on the input PIL image to generate region proposals.
     Returns a list of proposals as tuples (x1, y1, x2, y2).
@@ -213,21 +212,24 @@ def apply_crf(img_tensor, mask_tensor, n_iter=5):
     prob_2 = np.stack([prob_bg, prob_fg], axis=0)  # Shape: (2,H,W)
     unary = unary_from_softmax(prob_2)
     
+    # Reconstruct raw image tensor (reverse normalization)
     mean = torch.tensor([0.485, 0.456, 0.406], device=img_tensor.device).view(3, 1, 1)
     std = torch.tensor([0.229, 0.224, 0.225], device=img_tensor.device).view(3, 1, 1)
     img_tensor_raw = img_tensor * std + mean
+    
     # Convert image tensor to a NumPy array (H,W,3) for CRF.
     img_np = (img_tensor_raw.clamp(0, 1) * 255).byte().permute(1, 2, 0).cpu().numpy()
-
+    # Make sure the numpy array is C-contiguous.
+    img_np = np.ascontiguousarray(img_np)
+    
     d = dcrf.DenseCRF2D(W, H, 2)
     d.setUnaryEnergy(unary)
     d.addPairwiseGaussian(sxy=3, compat=3)
     d.addPairwiseBilateral(sxy=10, srgb=13, rgbim=img_np, compat=10)
-
+    
     Q = d.inference(n_iter)
     Q = np.array(Q).reshape((2, H, W))
     refined_fg = Q[1, :, :]
-    # Normalize the probabilities.
     denom = Q[0, :, :] + Q[1, :, :] + 1e-8
     refined_fg = refined_fg / denom
     refined_mask = (refined_fg >= 0.5).astype(np.float32)
@@ -444,8 +446,8 @@ def produce_final_masks(all_items, config, out_dir, device='cpu'):
 ##############################
 def main():
     # Define paths for the bounding box text files.
-    cat_txt = "./Data/paths_cats_with_box.txt"
-    dog_txt = "./Data/paths_dogs_with_box.txt"
+    cat_txt = "../Data/paths_cats_with_box.txt"
+    dog_txt = "../Data/paths_dogs_with_box.txt"
 
     # Parse the text files to obtain dictionaries mapping image paths to bounding boxes.
     cat_dict = parse_paths_file(cat_txt)

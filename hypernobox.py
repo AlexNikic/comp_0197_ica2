@@ -222,7 +222,7 @@ if __name__ == "__main__":
     os.makedirs("pseudo_mask", exist_ok=True)
 
     # Load labeled data from list.txt
-    data_list = parse_list_txt("oxford-iiit-pet/annotations/list.txt", "oxford-iiit-pet/images")
+    data_list = parse_list_txt("NoBoxScripts/list.txt", "images")
     
     # Load only a fraction of the data
     load_size = int(len(data_list) * load_fraction)
@@ -250,5 +250,5 @@ if __name__ == "__main__":
         save_mask_from_cam(cam_pil, mask_path, threshold=0.3)
 
     # Handle additional unlabeled images
-    process_unlabeled_images(model, "oxford-iiit-pet/images", "pseudo_mask", device, threshold=0.3)
-    process_remaining_missing_masks(model, "oxford-iiit-pet/images", "pseudo_mask", device, threshold=0.3)
+    process_unlabeled_images(model, "images", "pseudo_mask", device, threshold=0.3)
+    process_remaining_missing_masks(model, "images", "pseudo_mask", device, threshold=0.3)

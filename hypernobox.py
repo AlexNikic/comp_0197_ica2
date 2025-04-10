@@ -223,11 +223,11 @@ if __name__ == "__main__":
 
     # Load labeled data from list.txt
     data_list = parse_list_txt("NoBoxScripts/list.txt", "images")
-    
+
     # Load only a fraction of the data
     load_size = int(len(data_list) * load_fraction)
     data_list = data_list[:load_size]
-    
+
     dataset = OxfordPetCAMDataset(data_list)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 

@@ -36,7 +36,7 @@ def compute_mIoU(pred, target):
 
 def equivariant_loss(pred1, pred2, target, weight=1.0):
     criterion = nn.CrossEntropyLoss()
-    
+
     # Loss for the original and augmented predictions
     loss1 = criterion(pred1, target)
     loss2 = criterion(pred2, target)
@@ -117,7 +117,7 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
             outputs = model(images)["out"]
             augmented_outputs = model(augmented_images)["out"]
 
-            # Compute the loss with both regularisations
+            # Compute the loss with both regularizations
             loss = equivariant_loss(outputs, augmented_outputs, masks)
 
             loss.backward()
@@ -129,6 +129,7 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
         # ====== Validation ======
         model.eval()
         total_iou = 0.0
+        total_accuracy = 0.0  # Total pixel accuracy
         with torch.no_grad():
             for i, (image, mask) in enumerate(val_loader):
                 image, mask = image.to(device), mask.to(device)
@@ -136,11 +137,18 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
                 pred = torch.argmax(output, dim=1)
                 iou = compute_mIoU(pred, mask)
                 total_iou += iou.item()
+
+                # Calculate pixel accuracy
+                correct_predictions = (pred == mask).float().sum()
+                pixel_accuracy = correct_predictions / (mask.numel())
+                total_accuracy += pixel_accuracy.item()
+
                 pred_mask = pred.squeeze(0).cpu().byte() * 255
                 Image.fromarray(pred_mask.numpy()).save(os.path.join(save_dir, f"pred_{val_names[i]}.png"))
 
         mean_iou = total_iou / len(val_loader)
-        print(f"Epoch {epoch} - Validation mIoU: {mean_iou:.4f}")
+        mean_accuracy = total_accuracy / len(val_loader)  # Average over all validation batches
+        print(f"Epoch {epoch} - Validation mIoU: {mean_iou:.4f}, Pixel Accuracy: {mean_accuracy:.4f}")
 
         # Save best model
         if mean_iou > best_mIoU:

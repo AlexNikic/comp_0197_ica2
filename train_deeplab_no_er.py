@@ -40,11 +40,10 @@ def equivariant_cross_loss(pred1, pred2, target, weight=1.0):
     # Loss for the original predictions
     loss1 = criterion(pred1, target)
     
-
     # Equivariant Cross-Regularisation (comparing the predictions of original vs. transformed inputs)
     cross_reg_loss = torch.mean((pred1 - pred2) ** 2)  
 
-    # # Combine the relevant components
+    # Combine the relevant components
     return loss1 + weight * cross_reg_loss
 
 def train_model(train_fraction=0.01, val_fraction=0.01):  
@@ -126,6 +125,7 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
         # ====== Validation ======
         model.eval()
         total_iou = 0.0
+        total_accuracy = 0.0
         with torch.no_grad():
             for i, (image, mask) in enumerate(val_loader):
                 image, mask = image.to(device), mask.to(device)
@@ -133,11 +133,18 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
                 pred = torch.argmax(output, dim=1)
                 iou = compute_mIoU(pred, mask)
                 total_iou += iou.item()
+
+                # Calculate pixel accuracy
+                correct_predictions = (pred == mask).float().sum()
+                pixel_accuracy = correct_predictions / (mask.numel())
+                total_accuracy += pixel_accuracy.item()
+
                 pred_mask = pred.squeeze(0).cpu().byte() * 255
                 Image.fromarray(pred_mask.numpy()).save(os.path.join(save_dir, f"pred_{val_names[i]}.png"))
 
         mean_iou = total_iou / len(val_loader)
-        print(f"Epoch {epoch} - Validation mIoU: {mean_iou:.4f}")
+        mean_accuracy = total_accuracy / len(val_loader)  # Average over all validation batches
+        print(f"Epoch {epoch} - Validation mIoU: {mean_iou:.4f}, Pixel Accuracy: {mean_accuracy:.4f}")
 
         # Save best model
         if mean_iou > best_mIoU:

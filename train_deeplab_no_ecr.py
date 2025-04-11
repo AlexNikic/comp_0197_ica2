@@ -48,8 +48,8 @@ def equivariant_loss(pred1, pred2, target, weight=1.0):
     return loss1 + loss2 + weight * equivariant_reg_loss
 
 def train_model(train_fraction=0.01, val_fraction=0.01):  
-    image_dir = "oxford-iiit-pet/images"
-    mask_dir = "pseudo_mask"
+    image_dir = "images"
+    mask_dir = "NoBoxScripts/pseudo_mask"
     save_dir = "deeplab_output"
     os.makedirs(save_dir, exist_ok=True)
 
@@ -150,8 +150,8 @@ def train_model(train_fraction=0.01, val_fraction=0.01):
         # Save best model
         if mean_iou > best_mIoU:
             best_mIoU = mean_iou
-            torch.save(model.state_dict(), os.path.join(save_dir, "best_deeplabv3_model.pth"))
+            torch.save(model.state_dict(), os.path.join(save_dir, "deeplab_no_ecr.pth"))
             print("✅ Best model saved.")
 
 if __name__ == "__main__":
-    train_model(train_fraction=1, val_fraction=1)  # The fraction of the data used for training and validation 
+    train_model(train_fraction=0.8, val_fraction=0.2)  # The fraction of the data used for training and validation 

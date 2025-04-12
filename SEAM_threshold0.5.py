@@ -114,7 +114,7 @@ def find_unlabeled_images(image_dir, mask_dir):
 #############################################
 def process_unlabeled_images(model, image_dir, mask_dir, device, threshold=0.5):
     missing_images = find_unlabeled_images(image_dir, mask_dir)
-    print(f"\n🟡 Found {len(missing_images)} unlabeled images to process...")
+    print(f"\n Found {len(missing_images)} unlabeled images to process...")
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor()
@@ -130,7 +130,7 @@ def process_unlabeled_images(model, image_dir, mask_dir, device, threshold=0.5):
             pseudo_label = torch.argmax(breed_logits, dim=1).item()
         cam_pil = generate_cam_pil(model, input_tensor, pseudo_label, device)
         save_mask_from_cam(cam_pil, os.path.join(mask_dir, name + ".png"), threshold=threshold)
-        print(f"✅ Generated pseudo-mask for: {name}")
+        print(f" Generated pseudo-mask for: {name}")
 
 #############################################
 # Process Remaining Missing Masks (Fallback)
@@ -139,12 +139,12 @@ def process_remaining_missing_masks(model, image_dir, mask_dir, device, threshol
     all_images = set(f.replace(".jpg", "") for f in os.listdir(image_dir) if f.endswith(".jpg"))
     all_masks = set(f.replace(".png", "") for f in os.listdir(mask_dir) if f.endswith(".png"))
     missing = sorted(list(all_images - all_masks))
-    print(f"\n🔍 Total images: {len(all_images)}")
-    print(f"✅ Masks generated: {len(all_masks)}")
-    print(f"❌ Missing masks: {len(missing)}")
+    print(f"\n Total images: {len(all_images)}")
+    print(f" Masks generated: {len(all_masks)}")
+    print(f" Missing masks: {len(missing)}")
     print(f"Missing image names: {missing}")
     if not missing:
-        print("🎉 All images have corresponding pseudo-masks!")
+        print("All images have corresponding pseudo-masks!")
         return
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -153,7 +153,7 @@ def process_remaining_missing_masks(model, image_dir, mask_dir, device, threshol
     for name in missing:
         img_path = os.path.join(image_dir, name + ".jpg")
         if not os.path.exists(img_path):
-            print(f"⚠️ Image not found: {img_path}")
+            print(f" Image not found: {img_path}")
             continue
         image = Image.open(img_path).convert("RGB")
         input_tensor = transform(image).unsqueeze(0).to(device)
@@ -162,7 +162,7 @@ def process_remaining_missing_masks(model, image_dir, mask_dir, device, threshol
             pseudo_label = torch.argmax(breed_logits, dim=1).item()
         cam_pil = generate_cam_pil(model, input_tensor, pseudo_label, device)
         save_mask_from_cam(cam_pil, os.path.join(mask_dir, name + ".png"), threshold=threshold)
-        print(f"✅ Recovered mask for: {name}")
+        print(f" Recovered mask for: {name}")
 
 #############################################
 # Main Execution
@@ -214,7 +214,7 @@ if __name__ == "__main__":
         unlabeled = sorted(list(all_images - labeled_images))
 
         # Print info
-        print(f"\n🟡 Unlabeled images not in list.txt: {len(unlabeled)}")
+        print(f"\n Unlabeled images not in list.txt: {len(unlabeled)}")
         for name in unlabeled:
             print(f"  - {name}")
 
@@ -222,10 +222,10 @@ if __name__ == "__main__":
         with open(save_path, "w") as out_f:
             for name in unlabeled:
                 out_f.write(name + "\n")
-        print(f"📁 Saved to {save_path}")
+        print(f" Saved to {save_path}")
 
 
-    # ✅ Call it at the end of __main__
+    # Call it at the end of __main__
     export_unlabeled_image_list(
         image_dir="oxford-iiit-pet/images",
         list_path="oxford-iiit-pet/annotations/list.txt"

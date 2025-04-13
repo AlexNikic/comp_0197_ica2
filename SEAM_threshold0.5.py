@@ -174,13 +174,13 @@ if __name__ == "__main__":
 
     # Load model
     model = ResNetMultiTask(num_breeds=37)
-    model_path = os.path.join("comp_0197_ica2-main", "NoBoxScripts", "best_resnet_multitask_model.pth")
+    model_path = "NoBoxScripts/best_resnet_multitask_model.pth"
     model.load_state_dict(torch.load(model_path, map_location="cpu"))
     model.to(device)
     model.eval()
 
     # Load labeled data from list.txt
-    data_list = parse_list_txt("oxford-iiit-pet/annotations/list.txt", "oxford-iiit-pet/images")
+    data_list = parse_list_txt("NoBoxScripts/list.txt", "images")
     dataset = OxfordPetCAMDataset(data_list)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
@@ -198,8 +198,8 @@ if __name__ == "__main__":
             save_mask_from_cam(cam_pil, mask_path, threshold=0.5)
 
     # Handle additional unlabeled images
-    process_unlabeled_images(model, "oxford-iiit-pet/images", "pseudo_mask_thr05", device, threshold=0.5)
-    process_remaining_missing_masks(model, "oxford-iiit-pet/images", "pseudo_mask_thr05", device, threshold=0.5)
+    process_unlabeled_images(model, "images", "pseudo_mask_thr05", device, threshold=0.5)
+    process_remaining_missing_masks(model, "images", "pseudo_mask_thr05", device, threshold=0.5)
 
     # === Step 7: Output list of unlabeled data ===
     def export_unlabeled_image_list(image_dir, list_path, save_path="unlabeled_images_thr05.txt"):
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     # Call it at the end of __main__
     export_unlabeled_image_list(
-        image_dir="oxford-iiit-pet/images",
-        list_path="oxford-iiit-pet/annotations/list.txt"
+        image_dir="images",
+        list_path="NoBoxScripts/list.txt"
     )
 

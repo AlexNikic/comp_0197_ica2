@@ -1,0 +1,1 @@
+{"best_config": {"epochs": 15, "lr": 0.0005, "batch_size": 8}, "best_val_mIoU": 0.4753075398644445}

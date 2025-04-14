@@ -18,7 +18,7 @@ This script implements a fully supervised segmentation pipeline that:
   8) Computes and prints the overall mIoU and pixel accuracy.
 
 Requirements:
-  - PyTorch (≥1.13 for MPS support), torchvision, Pillow, OpenCV, NumPy.
+  - PyTorch (≥1.13 for MPS support), torchvision, Pillow, NumPy.
 """
 
 import os

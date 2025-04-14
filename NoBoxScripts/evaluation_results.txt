@@ -1,0 +1,6 @@
+=== Evaluation Results (Test Set) ===
+Total test samples: 3669
+
+Pseudo Mask mIoU: 0.7562   |   Pixel Acc: 0.8607
+Trimap mIoU: 0.8609   |   Pixel Acc: 0.9601
+With Aug mIoU: 0.8510   |   Pixel Acc: 0.9564

@@ -4,8 +4,6 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
-from tqdm import tqdm
-
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -26,22 +24,21 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 model = models.alexnet(pretrained=True)
 
-# Modify the final fully connected layer (classifier) to match the number of classes in the Oxford-IIIT Pet Dataset (37 classes)
+# Modify the final fully connected layer (classifier) to match the number of classes
 num_ftrs = model.classifier[6].in_features  # Get the number of input features to the last fully connected layer
 model.classifier[6] = nn.Linear(num_ftrs, len(train_dataset.classes))  # Update to match number of classes
 model.to(device)
 
 # Training loop
 def train_model(model, num_epochs=1, lr=1e-3):
-    print("***Training***")
-
+    print("*** Training ***")
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
-        for inputs, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
+        for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -54,17 +51,15 @@ def train_model(model, num_epochs=1, lr=1e-3):
 
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}")
 
-
 # Function to evaluate the model
 def evaluate_model(model, test_loader):
-    print("***Evaluating***")
-    
+    print("*** Evaluating ***")
     model.eval()
     running_corrects = 0
     total = 0
-    
+
     with torch.no_grad():
-        for inputs, labels in tqdm(test_loader, desc=f"Evaluating"):
+        for inputs, labels in test_loader:
             inputs, labels = inputs.to(device), labels.to(device)
 
             # Forward pass
@@ -76,7 +71,6 @@ def evaluate_model(model, test_loader):
 
     accuracy = running_corrects / total
     print(f"Accuracy: {accuracy:.4f}")
-
 
 # Train the model
 train_model(model, num_epochs=10)

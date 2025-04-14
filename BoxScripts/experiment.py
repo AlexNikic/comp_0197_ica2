@@ -80,26 +80,26 @@ def compute_mIoU_and_pixel_accuracy(pred_bin, gt_bin):
     pix_acc = correct / total
     return iou, pix_acc
 
-def create_overlay(orig_img_pil, pred_mask_np, alpha=0.5):
+def create_overlay(orig_img, pred_mask_np, alpha=0.5):
     """
-    Create an overlay image by blending the original image with a color-coded mask.
-    
-    Parameters:
-      orig_img_pil (PIL.Image): Original image (RGB).
-      pred_mask_np (ndarray): Predicted mask (H x W) with values in {0, 255}.
-      alpha (float): Blending factor.
-    
-    Returns:
-      overlay (ndarray): RGB overlay image.
+    Creates an overlay image by blending the original image with a color-coded mask.
+    Foreground (where the predicted mask equals 255) is shown in red,
+    while background (mask equals 0) is shown in blue.
+    This function uses Pillow for blending instead of OpenCV.
     """
-    orig_np = np.array(orig_img_pil.convert("RGB"))
-    colored = np.zeros_like(orig_np, dtype=np.uint8)
-    # Color assignments: foreground (mask == 255) in red; background (mask == 0) in blue.
-    colored[pred_mask_np == 255] = [255, 0, 0]
-    colored[pred_mask_np == 0] = [0, 0, 255]
-    overlay_np = cv2.addWeighted(orig_np, 1 - alpha, colored, alpha, 0)
-    return overlay_np
-
+    # Convert the original image to RGB (if not already) and ensure consistent size.
+    orig_rgb = orig_img.convert("RGB")
+    # Create a colored mask using numpy.
+    orig_np = np.array(orig_rgb)
+    colored_mask = np.zeros_like(orig_np, dtype=np.uint8)
+    # Set foreground to red and background to blue.
+    colored_mask[pred_mask_np == 255] = [255, 0, 0]
+    colored_mask[pred_mask_np == 0]   = [0, 0, 255]
+    # Convert the numpy array mask to a PIL image.
+    mask_img = Image.fromarray(colored_mask)
+    # Blend the original image and the colored mask.
+    overlay_img = Image.blend(orig_rgb, mask_img, alpha)
+    return np.array(overlay_img)
 # ------------------ Dataset Definition ------------------
 class BoxFilesDataset(Dataset):
     """

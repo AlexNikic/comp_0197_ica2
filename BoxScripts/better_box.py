@@ -14,10 +14,9 @@ This script:
   6) Saves the best configuration and final pseudo-masks into designated directories.
 
 Requirements:
-  - PyTorch and torchvision
   - scikit-image (pip install scikit-image)
   - pydensecrf (pip install pydensecrf)
-  - scikit-learn
+  - scikit-learn (pip install scikit-learn)
 """
 
 import os

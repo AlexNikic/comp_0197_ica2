@@ -37,7 +37,6 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms
 from torchvision.transforms import functional as TF
 from PIL import Image
-import cv2
 
 # ---------------- Global Configuration ----------------
 # Input text files (each line: <image_path> x1 y1 x2 y2)
@@ -433,14 +432,23 @@ def final_train_and_infer(best_config, dataset, device):
 def create_overlay(orig_img, pred_mask_np, alpha=0.5):
     """
     Creates an overlay image by blending the original image with a color-coded mask.
-    Foreground is red; background is blue.
+    Foreground (where the predicted mask equals 255) is shown in red,
+    while background (mask equals 0) is shown in blue.
+    This function uses Pillow for blending instead of OpenCV.
     """
-    orig_np = np.array(orig_img.convert("RGB"))
+    # Convert the original image to RGB (if not already) and ensure consistent size.
+    orig_rgb = orig_img.convert("RGB")
+    # Create a colored mask using numpy.
+    orig_np = np.array(orig_rgb)
     colored_mask = np.zeros_like(orig_np, dtype=np.uint8)
+    # Set foreground to red and background to blue.
     colored_mask[pred_mask_np == 255] = [255, 0, 0]
-    colored_mask[pred_mask_np == 0] = [0, 0, 255]
-    overlay = cv2.addWeighted(orig_np, 1 - alpha, colored_mask, alpha, 0)
-    return overlay
+    colored_mask[pred_mask_np == 0]   = [0, 0, 255]
+    # Convert the numpy array mask to a PIL image.
+    mask_img = Image.fromarray(colored_mask)
+    # Blend the original image and the colored mask.
+    overlay_img = Image.blend(orig_rgb, mask_img, alpha)
+    return np.array(overlay_img)
 
 # ---------- MAIN EXECUTION ----------
 def main():

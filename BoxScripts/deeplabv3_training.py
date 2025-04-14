@@ -29,7 +29,6 @@ import torch.optim as optim
 from math import inf
 from glob import glob
 from PIL import Image
-import cv2
 
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms
@@ -357,17 +356,30 @@ def final_train_and_predict(best_config, dataset, device):
         raw_mask_path= os.path.join(OUTPUT_DIR, f"{base}_mask.png")
         Image.fromarray(mask_np).save(raw_mask_path)
 
-        overlay_np= overlay_mask_on_image(orig_img, mask_np, alpha=0.5)
+        overlay_np= create_overlay(orig_img, mask_np, alpha=0.5)
         overlay_pil= Image.fromarray(overlay_np)
         overlay_pil.save(os.path.join(overlay_dir, f"{base}_overlay.jpg"), quality=85)
 
-def overlay_mask_on_image(original_img, mask_np, alpha=0.5):
-    original_np= np.array(original_img.convert("RGB"))
-    colored_mask= np.zeros_like(original_np)
-    colored_mask[mask_np==255] = [255,0,0]
-    colored_mask[mask_np==0]   = [0,0,255]
-    out_np= cv2.addWeighted(original_np, 1-alpha, colored_mask, alpha,0)
-    return out_np
+def create_overlay(orig_img, pred_mask_np, alpha=0.5):
+    """
+    Creates an overlay image by blending the original image with a color-coded mask.
+    Foreground (where the predicted mask equals 255) is shown in red,
+    while background (mask equals 0) is shown in blue.
+    This function uses Pillow for blending instead of OpenCV.
+    """
+    # Convert the original image to RGB (if not already) and ensure consistent size.
+    orig_rgb = orig_img.convert("RGB")
+    # Create a colored mask using numpy.
+    orig_np = np.array(orig_rgb)
+    colored_mask = np.zeros_like(orig_np, dtype=np.uint8)
+    # Set foreground to red and background to blue.
+    colored_mask[pred_mask_np == 255] = [255, 0, 0]
+    colored_mask[pred_mask_np == 0]   = [0, 0, 255]
+    # Convert the numpy array mask to a PIL image.
+    mask_img = Image.fromarray(colored_mask)
+    # Blend the original image and the colored mask.
+    overlay_img = Image.blend(orig_rgb, mask_img, alpha)
+    return np.array(overlay_img)
 
 def main():
     set_seed(42)

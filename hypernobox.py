@@ -6,10 +6,9 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.models import resnet18
-from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 
 # Define the fraction of data to load (between 0 and 1)
-load_fraction = 0.001  # Load 10% of the dataset
+load_fraction = 0.001  # Adjust the fraction as needed
 
 #############################################
 # Model: Multi-task ResNet for Species + Breed Classification
@@ -170,51 +169,8 @@ def process_remaining_missing_masks(model, image_dir, mask_dir, device, threshol
         print(f"✅ Recovered mask for: {name}")
 
 #############################################
-# Hyperparameter Tuning with Hyperopt
+# MAIN EXECUTION
 #############################################
-def train_model(model, dataloader, device):
-    # Implement your training logic here
-    # This is just a placeholder
-    return np.random.rand()  # Placeholder for training loss
-
-def validate_model(model, dataloader, device):
-    # Implement your validation logic here
-    # This is just a placeholder
-    return np.random.rand()  # Placeholder for validation loss
-
-def objective(params):
-    num_layers = params['num_layers'] + 2  # Increase by 2 to allow for the identity and final fully-connected layers reference
-    freeze_layers = params['freeze_layers']
-
-    # Create and configure the model
-    model = ResNetMultiTask(num_breeds=37)
-    model.backbone = resnet18(weights=None)
-
-    # Modify number of layers
-    layers = list(model.backbone.children())[:num_layers]
-    model.backbone = nn.Sequential(*layers)
-
-    # Freeze specified layers
-    for layer in model.backbone[:freeze_layers]:
-        for param in layer.parameters():
-            param.requires_grad = False
-
-    model.to(device)
-
-    # Train the model
-    train_loss = train_model(model, dataloader, device)
-    val_loss = validate_model(model, dataloader, device)
-
-    best_val_loss = val_loss
-
-    return {'loss': best_val_loss, 'status': STATUS_OK}
-
-# Define the hyperparameter space
-space = {
-    'num_layers': hp.randint('num_layers', 1, 16),  # Choose number of layers (1 to 16)
-    'freeze_layers': hp.randint('freeze_layers', 0, 16),  # Choose number of layers to freeze (0 to 15)
-}
-
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -231,16 +187,11 @@ if __name__ == "__main__":
     dataset = OxfordPetCAMDataset(data_list)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
-    # Start hyperparameter tuning
-    trials = Trials()
-    best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
-
-    print(f"Best Hyperparameters: {best}")
-
-    # Generate CAMs and masks for labeled images using the best found configuration
+    # For simplicity, we instantiate the model with default settings
     model = ResNetMultiTask(num_breeds=37)
     model.to(device)
 
+    # Generate CAMs and masks for labeled images
     for image, label, filename in DataLoader(dataset, batch_size=1):
         cam_pil = generate_cam_pil(model, image, label.item(), device)
         overlay_path = f"cam_vis/{filename[0]}_cam_overlay.jpg"

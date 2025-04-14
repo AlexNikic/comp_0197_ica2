@@ -15,7 +15,6 @@ A script that:
 Requirements:
   - PyTorch, torchvision
   - Pillow
-  - OpenCV (pip install opencv-python)
 """
 
 import os

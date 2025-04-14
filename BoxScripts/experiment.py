@@ -29,7 +29,6 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 from torchvision.models.segmentation import deeplabv3_resnet50
 from PIL import Image
-import cv2
 
 # ------------------ CONFIGURATION ------------------
 CATS_BOX_FILE   = "../Data/paths_cats_with_box.txt"

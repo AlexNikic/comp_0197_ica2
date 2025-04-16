@@ -129,14 +129,16 @@ class BoxFilesDatasetScratch(Dataset):
          image_path x1 y1 x2 y2
     Skips lines where the bounding box is "0 0 0 0".
     
-    Returns a tuple (image_tensor, base, bbox_224, img_path), where:
+    Returns a tuple (image_tensor, base, bbox_224, img_path, gt_np), where:
        - image_tensor is the normalized image (3,224,224),
        - base is the base filename (string),
        - bbox_224 is a list of 4 ints [x1, y1, x2, y2] in the 224×224 space,
        - img_path is the original image path (for reloading if needed).
+       - gt_np is the ground truth labels
     """
-    def __init__(self, cats_file, dogs_file):
+    def __init__(self, cats_file, dogs_file, gt_mask_dir = 'ground_trut_masks'):
         self.items = []
+        self.gt_mask_dir = gt_mask_dir
         for file_path in [cats_file, dogs_file]:
             if os.path.exists(file_path):
                 with open(file_path, 'r') as f:
@@ -190,8 +192,14 @@ class BoxFilesDatasetScratch(Dataset):
         # Transform the image to 224x224 for model input
         img_t = self.transform(pil_img)
 
+        #Load ground truth mask
+        gt_mask_path = os.path.join(self.gt_mask_dir, base + ".png")
+        gt_mask = Image.open(gt_mask_path).convert("L")
+        gt_mask = TF.resize(gt_mask, [224, 224], interpolation=TF.InterpolationMode.NEAREST)
+        gt_np = torch.from_numpy((np.array(gt_mask) >= 128).astype(np.uint8))
+      
         # Return scaled bbox, not the original
-        return img_t, base, scaled_bbox, img_path
+        return img_t, base, scaled_bbox, img_path, gt_np
 
 # ------------------ Helper Functions for Edges, Proposals, etc. ------------------
 def compute_boundary(mask, kernel_size=3):
@@ -379,20 +387,10 @@ def run_ablation_experiment(dataset, model, device):
         total_px = 0.0
         count = 0
 
-        for img_t, base, bbox_224, img_path in loader:
+        for img_t, base, bbox_224, img_path, gt_np in loader:
             # Move input to device
             img_t = img_t.to(device)
-
-            # Reload original image for region proposals/edge detection
-            # (but we will resize it to 224×224 inside advanced_boxsup to match)
-            pil_img = Image.open(img_path[0]).convert("RGB")
-
-            # Generate refined pseudo-mask from scratch
-            pseudo_mask = advanced_boxsup(
-                img_t.squeeze(0), pil_img, bbox_224, exp_config, device
-            )
-            pseudo_np = (pseudo_mask.detach().cpu().numpy() > 0.5).astype(np.uint8)
-
+            
             # Run model prediction
             with torch.no_grad():
                 logits = model(img_t)["out"]
@@ -400,7 +398,8 @@ def run_ablation_experiment(dataset, model, device):
             pred_np = (pred.cpu().numpy() > 0.5).astype(np.uint8)
 
             # Compute metrics
-            iou_val, px_acc = compute_mIoU_and_pixel_accuracy(pred_np, pseudo_np)
+            gt_np = gt_np.numpy()
+            iou_val, px_acc = compute_mIoU_and_pixel_accuracy(pred_np, gt_np)
             total_iou += iou_val
             total_px += px_acc
             count += 1

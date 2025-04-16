@@ -1,0 +1,1 @@
+{"num_iters": 3, "alpha": 0.42, "overlap_thresh": 0.3, "apply_crf": "False", "reg_lambda": 0.017, "do_morph": "True", "edge_weighting": "True"}

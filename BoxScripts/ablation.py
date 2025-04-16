@@ -53,10 +53,46 @@ ADV_PARAMS_CONST = {
 
 # Experiment variations for ablation study
 EXPERIMENT_CONFIGS = {
-    "Apply_CRF_only":   {"apply_crf": True,  "do_morph": False, "edge_weighting": False},
-    "Do_Morph_only":    {"apply_crf": False, "do_morph": True,  "edge_weighting": False},
-    "Edge_Weight_only": {"apply_crf": False, "do_morph": False, "edge_weighting": True},
-    "Optimal":          {"apply_crf": False, "do_morph": True,  "edge_weighting": True}
+    "None": {
+        "apply_crf": False,
+        "do_morph": False,
+        "edge_weighting": False
+    },
+    "Apply_CRF": {
+        "apply_crf": True,
+        "do_morph": False,
+        "edge_weighting": False
+    },
+    "Do_Morph": {
+        "apply_crf": False,
+        "do_morph": True,
+        "edge_weighting": False
+    },
+    "Edge_Weight": {
+        "apply_crf": False,
+        "do_morph": False,
+        "edge_weighting": True
+    },
+    "CRF_and_Morph": {
+        "apply_crf": True,
+        "do_morph": True,
+        "edge_weighting": False
+    },
+    "CRF_and_Edge": {
+        "apply_crf": True,
+        "do_morph": False,
+        "edge_weighting": True
+    },
+    "Morph_and_Edge": {
+        "apply_crf": False,
+        "do_morph": True,
+        "edge_weighting": True
+    },
+    "All": {
+        "apply_crf": True,
+        "do_morph": True,
+        "edge_weighting": True
+    }
 }
 
 # Data files and directories

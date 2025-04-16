@@ -466,16 +466,15 @@ def main():
         if boxes:
             all_items.append((img_path, boxes))
     
-    #print(f"[DEBUG] Using device={DEVICE}, total images={len(all_items)}")
-    #best_config, best_score = random_search_5fold(all_items, n_folds=N_FOLDS, n_search=N_SEARCH, device=DEVICE)
-    #print(f"\nBEST config: {best_config}, best pseudo-IoU = {best_score:.4f}")
+    print(f"[DEBUG] Using device={DEVICE}, total images={len(all_items)}")
+    best_config, best_score = random_search_5fold(all_items, n_folds=N_FOLDS, n_search=N_SEARCH, device=DEVICE)
+    print(f"\nBEST config: {best_config}, best pseudo-IoU = {best_score:.4f}")
     
-    #best_config_path = os.path.join(OUT_MODEL_DIR, "boxsup_best_config.json")
-    #with open(best_config_path, 'w') as f:
-    #    json.dump(best_config, f)
-    #print(f"[DEBUG] Saved best configuration to {best_config_path}")
+    best_config_path = os.path.join(OUT_MODEL_DIR, "boxsup_best_config.json")
+    with open(best_config_path, 'w') as f:
+        json.dump(best_config, f)
+    print(f"[DEBUG] Saved best configuration to {best_config_path}")
     
-    best_config = {"num_iters": 3, "alpha": 0.42, "overlap_thresh": 0.3, "apply_crf": False, "reg_lambda": 0.017, "do_morph": True, "edge_weighting": True}
     produce_final_masks(all_items, best_config, device=DEVICE, out_dir=OUT_MASK_DIR)
     print(f"[DEBUG] Final pseudo-masks saved in {OUT_MASK_DIR}. DONE.")
 

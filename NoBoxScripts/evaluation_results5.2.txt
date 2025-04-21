@@ -6,6 +6,4 @@ Pseudo + Dice Loss mIoU: 0.7654   |   Pixel Acc: 0.8681
 Pseudo + Aug + ComboLoss mIoU: 0.7835  |   Pixel Acc: 0.8777
 Pseudo + threshold0.5 mIoU: 0.5546   |   Pixel Acc: 0.7781
 Pseudo + threshold0.8 mIoU: 0.1740   |   Pixel Acc: 0.6029
-Pseudo + no ER mIoU: 0.2580   |   Pixel Acc: 0.6351
-Pseudo + no ECR mIoU: 0.3097   |   Pixel Acc: 0.6542
-Pseudo + ER + ECR mIoU: 0.2487   |   Pixel Acc: 0.6273
+Pseudo + ER (SEAM) mIoU: 0.7090   |   Pixel Acc: 0.7499

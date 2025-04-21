@@ -3,7 +3,6 @@ Total test samples: 3669
 
 Pseudo Mask (CAM) mIoU: 0.7562   |   Pixel Acc: 0.8607
 Pseudo + Dice Loss (CAM) mIoU: 0.7654   |   Pixel Acc: 0.8681
-Pseudo + Aug + ComboLoss (CAM) mIoU: 0.7468   |   Pixel Acc: 0.8577
 Pseudo + threshold0.5 (CAM) mIoU: 0.7011   |   Pixel Acc: 0.8998
 Pseudo + threshold0.8 (CAM) mIoU: 0.4707   |   Pixel Acc: 0.9422
 Pseudo Mask + ER (SEAM) mIoU: 0.7090   |   Pixel Acc: 0.7499

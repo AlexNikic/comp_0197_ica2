@@ -1,9 +1,9 @@
 === Evaluation Results (Test Set) ===
 Total test samples: 3669
 
-Pseudo Mask （CAM） mIoU: 0.7562   |   Pixel Acc: 0.8607
-Pseudo + Dice Loss mIoU: 0.7654   |   Pixel Acc: 0.8681
-Pseudo + Aug + ComboLoss mIoU: 0.7835  |   Pixel Acc: 0.8777
-Pseudo + threshold0.5 mIoU: 0.5546   |   Pixel Acc: 0.7781
-Pseudo + threshold0.8 mIoU: 0.1740   |   Pixel Acc: 0.6029
-Pseudo + ER (SEAM) mIoU: 0.7090   |   Pixel Acc: 0.7499
+Pseudo Mask (CAM) mIoU: 0.7562   |   Pixel Acc: 0.8607
+Pseudo + Dice Loss (CAM) mIoU: 0.7654   |   Pixel Acc: 0.8681
+Pseudo + Aug + ComboLoss (CAM) mIoU: 0.7468   |   Pixel Acc: 0.8577
+Pseudo + threshold0.5 (CAM) mIoU: 0.7011   |   Pixel Acc: 0.8998
+Pseudo + threshold0.8 (CAM) mIoU: 0.4707   |   Pixel Acc: 0.9422
+Pseudo Mask + ER (SEAM) mIoU: 0.7090   |   Pixel Acc: 0.7499

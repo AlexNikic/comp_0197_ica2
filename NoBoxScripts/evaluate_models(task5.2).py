@@ -174,9 +174,7 @@ def main():
         "Pseudo + Aug + ComboLoss": ("best_deeplabv3_pseudo_with_aug_refined.pth", "pseudo_mask"),
         "Pseudo + threshold0.5": ("best_deeplab_pseudo_thr05.pth", "pseudo_mask"),
         "Pseudo + threshold0.8": ("best_deeplab_pseudo_thr08.pth", "pseudo_mask"),
-        "Pseudo + no ER": ("deeplab_no_er.pth", "pseudo_mask"),
-        "Pseudo + no ECR": ("deeplab_no_ecr.pth", "pseudo_mask"),
-        "Pseudo + ER + ECR": ("deeplab_er_and_ecr.pth", "pseudo_mask"),
+        "Pseudo + ER": ("deeplab_er_and_ecr.pth", "pseudo_mask_er"),
     }
 
     print("=== Evaluation Results (Test Set) ===")
